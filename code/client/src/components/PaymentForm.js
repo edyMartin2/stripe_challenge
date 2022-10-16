@@ -1,6 +1,10 @@
 import React from "react";
 import Thanks from "./Thanks";
-
+import {
+  CardElement,
+  useStripe,
+  useElements
+} from "@stripe/react-stripe-js";
 //Payment Form, process user information to allow payment.
 
 const PaymentForm = (props) => {

@@ -1,9 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import SignupComplete from "./SignupComplete";
+import PaymenFor from './PaymentFor'
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+const STRIPE_PUBLISHABLE_KEY = process.env.STRIPE_PUBLISHABLE_KEY
 
+console.log('el process', process)
 //Registration Form Component, process user info for online session.
 //const textSingup = ;
+const promise = loadStripe(STRIPE_PUBLISHABLE_KEY);
+
+
 const RegistrationForm = ({ selected, details }) => {
+
   if (selected !== -1) {
     return (
       <div className={`lesson-form`}>
@@ -31,8 +40,13 @@ const RegistrationForm = ({ selected, details }) => {
                   autoComplete="cardholder"
                 />
               </div>
-              <div className="lesson-input-box last">
-                <div className="lesson-card-element"></div>
+              <div className="lesson-input-box middle">
+                <div className="lesson-card-element">
+                  {/* Targeta */}
+                  <Elements stripe={promise}>
+                    <PaymenFor></PaymenFor>
+                  </Elements>
+                </div>
               </div>
             </div>
             <div className="sr-field-error" id="card-errors" role="alert"></div>
@@ -59,7 +73,7 @@ const RegistrationForm = ({ selected, details }) => {
         </div>
 
         <SignupComplete active={false} email="" last4="" customer_id="" />
-      </div>
+      </div >
     );
   } else {
     return "";
