@@ -28,6 +28,14 @@ app.use(
 );
 app.use(cors({ origin: true }));
 
+//react views
+
+app.set('views', process.env.STATIC_DIR + '/src/pages');
+app.set('view engine', 'jsx');
+app.engine('jsx', require('express-react-views').createEngine());
+
+
+
 // load config file
 const fs = require('fs');
 
@@ -36,6 +44,7 @@ const config = JSON.parse(configFile);
 
 // load items file for video courses
 const file = require('../items.json');
+
 
 file.forEach((item) => {
   const initializedItem = item;
@@ -114,18 +123,12 @@ app.get('/setup-video-page', (req, res) => {
 // Milestone 1: Signing up
 // Shows the lesson sign up page.
 app.get('/lessons', (req, res) => {
-  try {
-    const path = resolve(`${process.env.STATIC_DIR}/lessons.html`);
-    if (!fs.existsSync(path)) throw Error();
-    res.sendFile(path);
-  } catch (error) {
-    const path = resolve('./public/static-file-error.html');
-    res.sendFile(path);
-  }
+  res.redirect(`${process.env.WEB_APP_URL}/lessons`)
 });
 
-app.post('/lessons', async (req, res) => {
-  res.end(200)
+app.post('/lessons', (req, res)=>{
+  console.log('request ---->', req)
+  return 200;
 })
 
 // Milestone 2: '/schedule-lesson'
