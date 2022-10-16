@@ -124,6 +124,10 @@ app.get('/lessons', (req, res) => {
   }
 });
 
+app.post('/lessons', async (req, res) => {
+  res.end(200)
+})
+
 // Milestone 2: '/schedule-lesson'
 // Authorize a payment for a lesson
 //
@@ -215,13 +219,13 @@ app.post('/complete-lesson-payment', async (req, res) => {
 //      }
 //  }
 app.post('/refund-lesson', async (req, res) => {
-  
+
 });
 
 // Milestone 3: Managing account info
 // Displays the account update page for a given customer
 app.get('/account-update/:customer_id', async (req, res) => {
-  
+
 });
 
 
@@ -255,7 +259,7 @@ app.get('/account-update/:customer_id', async (req, res) => {
 //
 
 app.post('/delete-account/:customer_id', async (req, res) => {
-  
+
 });
 
 
@@ -275,7 +279,7 @@ app.post('/delete-account/:customer_id', async (req, res) => {
 // }
 //
 app.get('/calculate-lesson-total', async (req, res) => {
-  
+
 });
 
 
@@ -311,7 +315,7 @@ app.get('/calculate-lesson-total', async (req, res) => {
 //   <customer_id>: {},
 // ]
 app.get('/find-customers-with-failed-payments', async (req, res) => {
-  
+
 });
 
 function errorHandler(err, req, res, next) {
