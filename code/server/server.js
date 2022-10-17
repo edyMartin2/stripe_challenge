@@ -9,6 +9,7 @@ const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
 
 const allitems = {};
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // const MIN_ITEMS_FOR_DISCOUNT = 2;
 app.use(express.static(process.env.STATIC_DIR));
@@ -122,13 +123,60 @@ app.get('/setup-video-page', (req, res) => {
 
 // Milestone 1: Signing up
 // Shows the lesson sign up page.
+
+app.get('/get_key', (req, res) => {
+  res.send({ app_key: process.env.STRIPE_PUBLISHABLE_KEY })
+})
+
 app.get('/lessons', (req, res) => {
   res.redirect(`${process.env.WEB_APP_URL}/lessons`)
 });
 
-app.post('/lessons', (req, res)=>{
-  console.log('request ---->', req)
-  return 200;
+app.post('/lessons', async (req, res) => {
+
+  /**
+   * Crear costumer
+   * Añadir metodo de pago
+   * Añadir email
+   */
+  const body = req.body;
+  console.log(body)
+  const customer = await stripe.customers.create({
+    description: '',
+    email: body.email,
+    name: body.name
+  });
+
+  // const paymentMethod = await stripe.paymentMethods.create({
+  //   type: 'card',
+  //   card: {
+  //     number: body.number,
+  //     exp_month: body.exp_month,
+  //     exp_year: body.exp_year,
+  //     cvc: body.csv,
+  //   },
+  //   billing_details: {
+  //     address: {
+  //       postal_code: body.postal_code
+  //     }
+  //   }
+  // });
+
+  const paymentMethod_atach = await stripe.paymentMethods.attach(
+    body.paymentMethodId,
+    { customer: customer.id }
+  );
+
+  const response = {
+    customer: customer,
+    paymentMethod: body.paymentMethodId,
+    paymentMethod_atach: paymentMethod_atach
+  }
+
+
+  res.send(response)
+
+
 })
 
 // Milestone 2: '/schedule-lesson'

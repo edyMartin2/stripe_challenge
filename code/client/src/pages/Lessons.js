@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import RegistrationForm from "../components/RegistrationForm";
 import "../css/lessons.scss";
 import Header from "../components/Header";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+import axios from 'axios';
 
 const months = [
   "Jan",
@@ -34,6 +37,7 @@ const Lessons = () => {
   const [sessions, setSessions] = useState([]); //info about available sessions
   const [selected, setSelected] = useState(-1); //index of selected session
   const [details, setDetails] = useState(""); //details about selected session
+  const [key, setKey] = useState('')
 
   //toggle selected session
   const toggleItem = (index) => {
@@ -63,45 +67,60 @@ const Lessons = () => {
     items.push(formatSession(2, "third", session, "5:00 p.m."));
     setSessions((prev) => [...prev, ...items]);
   }, []);
+  //get key 
+  useEffect(() => {
+    axios.get('http://localhost:4242/get_key')
+      .then(res => {
+        console.log('la respuesta', res.data.app_key)
+        setKey(res.data.app_key)
+      })
+      .catch(e => {
+        console.log(e);
+        setKey('error', e)
+      })
+  }, [])
+  const promise = loadStripe(key);
 
   return (
     <main className="main-lessons">
-      <Header selected="lessons" />
-      {
-        //Component to process user info for registration.
-      }
-      <RegistrationForm selected={selected} details={details} />
-      <div className="lesson-title" id="title">
-        <h2>Guitar lessons</h2>
-      </div>
-      <div className="lesson-instruction">
-        Choose from one of our available lessons to get started.
-      </div>
-      <div className="lessons-container">
-        <div className="lessons-img">
-          <img src="/assets/img/lessons.png" alt="" />
+      <Elements stripe={promise}>
+        <Header selected="lessons" />
+        {
+          //Component to process user info for registration.
+        }
+        <RegistrationForm selected={selected} details={details} />
+        <div className="lesson-title" id="title">
+          <h2>Guitar lessons</h2>
         </div>
-        <div id="sr-items" className="lessons-cards">
-          {sessions.map((session) => (
-            <div
-              className={`lesson-card ${session.selected}`}
-              key={session.index}
-            >
-              <div className="lesson-info">
-                <h2 className="lesson-date">{session.date}</h2>
-                <h4 className="lesson-time">{session.time}</h4>
-              </div>
-              <button
-                className="lesson-book"
-                id={session.id}
-                onClick={() => toggleItem(session.index)}
+        <div className="lesson-instruction">
+          Choose from one of our available lessons to get started.
+        </div>
+        <div className="lessons-container">
+          <div className="lessons-img">
+            <img src="/assets/img/lessons.png" alt="" />
+          </div>
+          <div id="sr-items" className="lessons-cards">
+            {sessions.map((session) => (
+              <div
+                className={`lesson-card ${session.selected}`}
+                key={session.index}
               >
-                Book now!
-              </button>
-            </div>
-          ))}
+                <div className="lesson-info">
+                  <h2 className="lesson-date">{session.date}</h2>
+                  <h4 className="lesson-time">{session.time}</h4>
+                </div>
+                <button
+                  className="lesson-book"
+                  id={session.id}
+                  onClick={() => toggleItem(session.index)}
+                >
+                  Book now!
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      </Elements>
     </main>
   );
 };

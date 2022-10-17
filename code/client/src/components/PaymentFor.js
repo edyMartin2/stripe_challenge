@@ -5,7 +5,7 @@ import {
   useElements
 } from "@stripe/react-stripe-js";
 
-export default function CheckoutForm() {
+export default function CheckoutForm({ handleSubmit }) {
   const [succeeded, setSucceeded] = useState(false);
   const [error, setError] = useState(null);
   const [processing, setProcessing] = useState('');
@@ -22,7 +22,7 @@ export default function CheckoutForm() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({items: [{ id: "xl-tshirt" }]})
+        body: JSON.stringify({ items: [{ id: "xl-tshirt" }] })
       })
       .then(res => {
         return res.json();
@@ -58,30 +58,43 @@ export default function CheckoutForm() {
     setError(event.error ? event.error.message : "");
   };
 
-  const handleSubmit = async ev => {
-    ev.preventDefault();
-    setProcessing(true);
+  // const handleSubmit = async ev => {
+  //   ev.preventDefault();
+  //   setProcessing(true);
 
-    const payload = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: elements.getElement(CardElement)
-      }
-    });
+  //   console.log('--->',ev)
 
-    if (payload.error) {
-      setError(`Payment failed ${payload.error.message}`);
-      setProcessing(false);
-    } else {
-      setError(null);
-      setProcessing(false);
-      setSucceeded(true);
-    }
-  };
+  //   const payload = await stripe.createPaymentMethod({
+  //     type:'card',
+  //     card: elements.getElement(CardElement)
+  //   })
+  //   console.log(payload)
+  //   if (payload.error) {
+  //     setError(`Payment failed ${payload.error.message}`);
+  //     setProcessing(false);
+  //   } else {
+
+  //     setError(null);
+  //     setProcessing(false);
+  //     setSucceeded(true);
+  //   }
+  // };
 
   return (
     <form id="payment-form" onSubmit={handleSubmit}>
       <CardElement id="card-element" options={cardStyle} onChange={handleChange} />
-      
+      {/* <button
+        disabled={processing || disabled || succeeded}
+        id="submit"
+      >
+        <span id="button-text">
+          {processing ? (
+            <div className="spinner" id="spinner"></div>
+          ) : (
+            "Pay now"
+          )}
+        </span>
+      </button> */}
       {/* Show any error that happens when processing the payment */}
       {error && (
         <div className="card-error" role="alert">

@@ -1,9 +1,9 @@
 import React from "react";
 
 const SignupComplete = ({ active, email, last4, customer_id }) => {
-  if (active) {
+  
     return (
-      <div className="lesson-complete hidden">
+      <div style={{display: active}}>
         <h3 id="signup-status">
           Woohoo!
           {"\n"}
@@ -23,9 +23,7 @@ const SignupComplete = ({ active, email, last4, customer_id }) => {
         </button>
       </div>
     );
-  } else {
-    return "";
-  }
+
 };
 
 export default SignupComplete;
