@@ -23,6 +23,7 @@ const RegistrationForm = ({ selected, details }) => {
   const [card, setCard] = useState([])
   const [customer, setCustomer] = useState([])
   const [last4, setLast4] = useState('')
+  const [buttondisabled, setButtondisabled] = useState(true);
   const stripe = useStripe();
   const elements = useElements();
 
@@ -96,10 +97,9 @@ const RegistrationForm = ({ selected, details }) => {
 
 
   const handleChange = async (event) => {
-    // Listen for changes in the CardElement
-    // and display any errors as the customer types their card details
-    // setDisabled(event.empty);
-    // setError(event.error ? event.error.message : "");
+    if(event.complete && email !== '' && name !== ''){
+      setButtondisabled(false)
+    }
   };
 
   useEffect(() => {
@@ -160,7 +160,7 @@ const RegistrationForm = ({ selected, details }) => {
                 <span id="account_link"></span>.
               </div>
             </div>
-            <button id="submit">
+            <button id="submit" disabled={buttondisabled}>
               <div className="spinner hidden" id="spinner"></div>
               <span id="button-text">Request Lesson</span>
             </button>
