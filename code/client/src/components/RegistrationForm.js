@@ -27,6 +27,10 @@ const RegistrationForm = ({ selected, details }) => {
   const stripe = useStripe();
   const elements = useElements();
 
+  const [processing, setProcessing] = useState('');
+  const [disabled, setDisabled] = useState(true);
+  const [succeeded, setSucceeded] = useState(false);
+  const [error , setError] = useState('');
   const cardStyle = {
     style: {
       base: {
@@ -49,13 +53,17 @@ const RegistrationForm = ({ selected, details }) => {
 
   const handleSubmit = async ev => {
     ev.preventDefault();
+    setProcessing(true);
+
     const payload = await stripe.createPaymentMethod({
       type: 'card',
       card: elements.getElement(CardElement)
     })
 
     if (payload.error) {
-      console.log('error al crear')
+      
+      setError(`Payment failed ${payload.error.message}`);
+      setProcessing(false);
     } else {
 
       let paymentId = payload.paymentMethod.id
@@ -64,8 +72,21 @@ const RegistrationForm = ({ selected, details }) => {
       setCard(card)
       cerate_customer(paymentId);
 
-
+      setError(null);
+      setProcessing(false);
+      setSucceeded(true);
     }
+
+
+    // if (payload.error) {
+    //   setError(`Payment failed ${payload.error.message}`);
+    //   setProcessing(false);
+    // } else {
+    //   setError(null);
+    //   setProcessing(false);
+    //   setSucceeded(true);
+    // }
+
   };
 
   const cerate_customer = (paymentId) => {
@@ -88,6 +109,7 @@ const RegistrationForm = ({ selected, details }) => {
       .then(function (response) {
         setCustomer(response.data.customer)
         setActive('')
+        setButtondisabled(true)
       })
       .catch(function (error) {
         setCustomer([])
@@ -97,9 +119,13 @@ const RegistrationForm = ({ selected, details }) => {
 
 
   const handleChange = async (event) => {
-    if(event.complete && email !== '' && name !== ''){
-      setButtondisabled(false)
-    }
+    // if (event.complete && email !== '' && name !== '') {
+    //   setButtondisabled(false)
+    // }
+    console.log(event)
+    setDisabled(event.empty);
+    setError(event.error ? event.error.message : "");
+
   };
 
   useEffect(() => {
@@ -110,7 +136,7 @@ const RegistrationForm = ({ selected, details }) => {
     return (
       <div className={`lesson-form`}>
         <form id="payment-form" onSubmit={handleSubmit}>
-          <div className={`lesson-desc`} style={{ display: active == 'none' ? '' : 'none' }}>
+          <div className={`lesson-desc`}>
             <h3>Registration details</h3>
             <div id="summary-table" className="lesson-info">
               {details}
@@ -163,6 +189,19 @@ const RegistrationForm = ({ selected, details }) => {
             <button id="submit" disabled={buttondisabled}>
               <div className="spinner hidden" id="spinner"></div>
               <span id="button-text">Request Lesson</span>
+            </button>
+
+            <button
+              disabled={processing || disabled || succeeded}
+              id="submit"
+            >
+              <span id="button-text">
+                {processing ? (
+                  <div className="spinner" id="spinner"></div>
+                ) : (
+                  "Pay now"
+                )}
+              </span>
             </button>
             <div className="lesson-legal-info">
               Your card will not be charged. By registering, you hold a session
