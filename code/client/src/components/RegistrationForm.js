@@ -16,21 +16,25 @@ import axios from 'axios';
 const RegistrationForm = ({ selected, details }) => {
 
   // const [key, setKey] = useState('')
-  const [active, setActive] = useState('none')
+  const [active, setActive] = useState(false)
   const [display, setDisplay] = useState('')
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
   const [card, setCard] = useState([])
   const [customer, setCustomer] = useState([])
+  const [dataBack, setDataBack] = useState([])
   const [last4, setLast4] = useState('')
   const [buttondisabled, setButtondisabled] = useState(true);
+  const [redirect, setRedirect] = useState(false)
   const stripe = useStripe();
   const elements = useElements();
 
   const [processing, setProcessing] = useState('');
   const [disabled, setDisabled] = useState(true);
   const [succeeded, setSucceeded] = useState(false);
-  const [error , setError] = useState('');
+  const [error, setError] = useState('');
+  const [emailhidden, setEmailhidden] = useState(true);
+
   const cardStyle = {
     style: {
       base: {
@@ -61,7 +65,6 @@ const RegistrationForm = ({ selected, details }) => {
     })
 
     if (payload.error) {
-      
       setError(`Payment failed ${payload.error.message}`);
       setProcessing(false);
     } else {
@@ -108,8 +111,25 @@ const RegistrationForm = ({ selected, details }) => {
     axios(config)
       .then(function (response) {
         setCustomer(response.data.customer)
-        setActive('')
-        setButtondisabled(true)
+        setDataBack(response.data)
+
+        let emailHidden = response.data.customer.error === 500 ? false : true;
+        setEmailhidden(emailHidden)
+        let paymentIntent = response.data.PaymentIntent.data;
+        let status = paymentIntent ? paymentIntent.confirm ? paymentIntent.confirm.status === 'succeeded' ? true : false : false : false;
+        let typeOfRedirect = paymentIntent ? paymentIntent.next_action ? paymentIntent.next_action.use_stripe_sdk.type : false : false;
+        let url = typeOfRedirect === "three_d_secure_redirect" ? paymentIntent.next_action.use_stripe_sdk.stripe_js : false;
+        if (emailHidden === true) {
+          if (status === true && url === false && emailhidden === true) {
+            setActive(true)
+            setButtondisabled(true)
+          } else {
+            console.log('errores', status, url, emailhidden)
+            setActive(false)
+            setButtondisabled(false)
+            setRedirect(url)
+          }
+        }
       })
       .catch(function (error) {
         setCustomer([])
@@ -129,14 +149,14 @@ const RegistrationForm = ({ selected, details }) => {
   };
 
   useEffect(() => {
-    console.log('datos finales', card, customer, '<----------------------')
+    console.log('datos finales', dataBack, '<----------------------')
   })
 
   if (selected !== -1) {
     return (
       <div className={`lesson-form`}>
-        <form id="payment-form" onSubmit={handleSubmit}>
-          <div className={`lesson-desc`}>
+        <div className={`lesson-desc ${active === false ? '' : 'hidden'}`}>
+          <form id="payment-form" onSubmit={handleSubmit} >
             <h3>Registration details</h3>
             <div id="summary-table" className="lesson-info">
               {details}
@@ -173,23 +193,29 @@ const RegistrationForm = ({ selected, details }) => {
                   </div>
                 </div>
               </div>
-              <div className="sr-field-error" id="card-errors" role="alert"></div>
+
+              <div className="sr-field-error" id="card-errors" role="alert">
+                {error}
+              </div>
+
               <div
                 className="sr-field-error"
                 id="customer-exists-error"
                 role="alert"
-                hidden
+                hidden={emailhidden}
               >
-                A customer with the email address of{" "}
+                A customer with the email address of {email}
                 <span id="error_msg_customer_email"></span> already exists. If
                 you'd like to update the card on file, please visit
                 <span id="account_link"></span>.
               </div>
             </div>
-            <button id="submit" disabled={buttondisabled}>
-              <div className="spinner hidden" id="spinner"></div>
+            {/* <button id="submit" disabled={buttondisabled}>
+              <div className="spinner hidden" id="spinner">
+
+              </div>
               <span id="button-text">Request Lesson</span>
-            </button>
+            </button> */}
 
             <button
               disabled={processing || disabled || succeeded}
@@ -199,7 +225,7 @@ const RegistrationForm = ({ selected, details }) => {
                 {processing ? (
                   <div className="spinner" id="spinner"></div>
                 ) : (
-                  "Pay now"
+                  "Request Lesson"
                 )}
               </span>
             </button>
@@ -207,9 +233,8 @@ const RegistrationForm = ({ selected, details }) => {
               Your card will not be charged. By registering, you hold a session
               slot which we will confirm within 24 hrs.
             </div>
-          </div>
-
-        </form>
+          </form>
+        </div>
         <SignupComplete active={active} email={email} last4={last4} customer_id={customer.id} />
       </div >
     );
