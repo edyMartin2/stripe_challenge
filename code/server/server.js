@@ -155,7 +155,8 @@ app.post('/lessons', async (req, res) => {
   // );
   const body = req.body;
   const CustomerServiceResponse = await CustomerService(body).then(res => { return res });
-  body.customerId = CustomerServiceResponse.data
+  body.customerId = CustomerServiceResponse.data ? CustomerServiceResponse.data : CustomerServiceResponse;
+  console.log('data customer', CustomerServiceResponse)
   const PaymentServiceResponse = await PaymentIntent(body).then(res => { return res })
   const response = {
     customer: CustomerServiceResponse,
