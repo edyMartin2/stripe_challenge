@@ -10,7 +10,8 @@ const { v4: uuidv4 } = require('uuid');
 
 const allitems = {};
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-
+const { CustomerService } = require('./Services/customer');
+const { PaymentIntent } = require('./Services/payment')
 // const MIN_ITEMS_FOR_DISCOUNT = 2;
 app.use(express.static(process.env.STATIC_DIR));
 
@@ -139,40 +140,27 @@ app.post('/lessons', async (req, res) => {
    * Añadir metodo de pago
    * Añadir email
    */
-  const body = req.body;
-  console.log(body)
-  const customer = await stripe.customers.create({
-    description: '',
-    email: body.email,
-    name: body.name
-  });
 
-  // const paymentMethod = await stripe.paymentMethods.create({
-  //   type: 'card',
-  //   card: {
-  //     number: body.number,
-  //     exp_month: body.exp_month,
-  //     exp_year: body.exp_year,
-  //     cvc: body.csv,
-  //   },
-  //   billing_details: {
-  //     address: {
-  //       postal_code: body.postal_code
-  //     }
-  //   }
+  // console.log(body)
+  // const customer = await stripe.customers.create({
+  //   description: '',
+  //   email: body.email,
+  //   name: body.name
   // });
 
-  const paymentMethod_atach = await stripe.paymentMethods.attach(
-    body.paymentMethodId,
-    { customer: customer.id }
-  );
 
+  // const paymentMethod_atach = await stripe.paymentMethods.attach(
+  //   body.paymentMethodId,
+  //   { customer: customer.id }
+  // );
+  const body = req.body;
+  const CustomerServiceResponse = await CustomerService(body).then(res => { return res });
+  body.customerId = CustomerServiceResponse.data
+  const PaymentServiceResponse = await PaymentIntent(body).then(res => { return res })
   const response = {
-    customer: customer,
-    paymentMethod: body.paymentMethodId,
-    paymentMethod_atach: paymentMethod_atach
+    customer: CustomerServiceResponse,
+    PaymentIntent: PaymentServiceResponse
   }
-
 
   res.send(response)
 
