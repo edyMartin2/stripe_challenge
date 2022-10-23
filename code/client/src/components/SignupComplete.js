@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 const SignupComplete = ({ active, email, last4, customer_id }) => {
+
   if (active) {
     return (
-      <div className="lesson-complete hidden">
+      <div className="lesson-complete ">
         <h3 id="signup-status">
           Woohoo!
           {"\n"}

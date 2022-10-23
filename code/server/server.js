@@ -10,8 +10,8 @@ const { v4: uuidv4 } = require('uuid');
 
 const allitems = {};
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const { CustomerService } = require('./Services/customer');
-const { PaymentIntent } = require('./Services/payment')
+const { CustomerService, SearchCustomer, GetCustomer } = require('./Services/customer');
+const { PaymentIntent, GetPaymentMethod } = require('./Services/payment')
 // const MIN_ITEMS_FOR_DISCOUNT = 2;
 app.use(express.static(process.env.STATIC_DIR));
 
@@ -134,25 +134,6 @@ app.get('/lessons', (req, res) => {
 });
 
 app.post('/lessons', async (req, res) => {
-
-  /**
-   * Crear costumer
-   * Añadir metodo de pago
-   * Añadir email
-   */
- 
-  // console.log(body)
-  // const customer = await stripe.customers.create({
-  //   description: '',
-  //   email: body.email,
-  //   name: body.name
-  // });
-
-
-  // const paymentMethod_atach = await stripe.paymentMethods.attach(
-  //   body.paymentMethodId,
-  //   { customer: customer.id }
-  // );
   const body = req.body;
   const CustomerServiceResponse = await CustomerService(body).then(res => { return res });
   body.customerId = CustomerServiceResponse.data
@@ -164,10 +145,19 @@ app.post('/lessons', async (req, res) => {
   }
 
   res.send(response)
+});
 
-
+app.get('/get_account/:id', async (req, res) => {
+  let customer_id = req.params.id;
+  let customer_data = await GetCustomer({ id: customer_id }).then(res => { return res })
+  console.log('cutomer_data -->', customer_data)
+  let payment_method = await GetPaymentMethod({ customerId: customer_data.id }).then(res => { return res })
+  let response = {
+    customer: customer_data,
+    payment_method: payment_method
+  }
+  res.send(response)
 })
-
 // Milestone 2: '/schedule-lesson'
 // Authorize a payment for a lesson
 //
@@ -227,7 +217,7 @@ app.post('/schedule-lesson', async (req, res) => {
 // }
 //
 app.post('/complete-lesson-payment', async (req, res) => {
-
+  res.end(req)
 });
 
 // Milestone 2: '/refund-lesson'

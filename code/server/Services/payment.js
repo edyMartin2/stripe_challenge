@@ -14,27 +14,39 @@ const Attach = async (data) => {
             customer: data.customerId
         }
     );
+    console.log('attach response', paymentMethod_atach)
     return paymentMethod_atach;
 }
 
 const Create = async (data) => {
-    const paymentIntent = await stripe.paymentIntents.create({
+    const paymentIntent_create = await stripe.paymentIntents.create({
         amount: 2000,
         currency: 'mxn',
         payment_method_types: ['card'],
         customer: data.customerId,
         payment_method: data.paymentMethodId
     });
-    return paymentIntent;
+    console.log('create response', paymentIntent_create)
+    return paymentIntent_create;
 }
 
 const Confirm = async (data) => {
-    const paymentIntent = await stripe.paymentIntents.confirm(
+    const paymentIntent_confirm = await stripe.paymentIntents.confirm(
         data.paymentIntent,
         { payment_method: data.paymentMethodId }
     );
-    return paymentIntent
+    console.log('confirm response', paymentIntent_confirm)
+    return paymentIntent_confirm
 }
+
+const GetPaymentMethod = async (data) => {
+    const paymentMethods = await stripe.customers.listPaymentMethods(
+        data.customerId,
+        { type: 'card' }
+    );
+    return paymentMethods.data ? paymentMethods.data[0] : paymentMethods;
+}
+
 
 const PaymentIntent = async (data) => {
     var response = { error: [], data: { attach: [], create: [], confirm: [] }, success: 100 }
@@ -45,7 +57,7 @@ const PaymentIntent = async (data) => {
         let attach_response = await Attach(data).then(res => { return res }).catch(e => { return [] })
         let create_response = await Create(data).then(res => { return res }).catch(e => { return [] })
         console.log("entro nivel 1")
-        if (attach_response !== [] && create_response !== []) {
+        if (/*attach_response !== [] &&  */   create_response !== []) {
             response.data.attach = attach_response;
             response.data.create = create_response;
             data.paymentIntent = create_response.id;
@@ -61,11 +73,12 @@ const PaymentIntent = async (data) => {
             console.log("entro nivel 4")
             response.error = "Algun campo esta mal"
         }
-       
+
     }
     return response
 }
 
 module.exports = {
-    PaymentIntent
+    PaymentIntent,
+    GetPaymentMethod
 }

@@ -72,7 +72,7 @@ const RegistrationForm = ({ selected, details }) => {
       let paymentId = payload.paymentMethod.id
       let card = payload.paymentMethod.card
       setLast4(card.last4)
-      setCard(card)
+      setCard(payload)
       cerate_customer(paymentId);
 
       setError(null);
@@ -110,7 +110,7 @@ const RegistrationForm = ({ selected, details }) => {
 
     axios(config)
       .then(function (response) {
-        setCustomer(response.data.customer)
+        setCustomer(response.data.customer.data)
         setDataBack(response.data)
 
         let emailHidden = response.data.customer.error === 500 ? false : true;
@@ -149,7 +149,7 @@ const RegistrationForm = ({ selected, details }) => {
   };
 
   useEffect(() => {
-    console.log('datos finales', dataBack, '<----------------------')
+    console.log('datos finales', dataBack, error, card, '<----------------------')
   })
 
   if (selected !== -1) {

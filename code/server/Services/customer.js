@@ -2,7 +2,7 @@ require('dotenv').config({ path: '../.env' });
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const SearchCustomer = async (body) => {
-    const query = `email : \'${body.email}\'`;
+    const query = body.email ? `email : \'${body.email}\'` : `id: \'${body.id}\'`;
     const search = await stripe.customers.search({
         query: query
     });
@@ -31,9 +31,15 @@ const CustomerService = async (body) => {
     return response
 }
 
+const GetCustomer = async (body) => {
+    console.log('se busca',body.id)
+    let get = await stripe.customers.retrieve(body.id)
+    return get;
+}
 
 module.exports = {
     CustomerService,
     SearchCustomer,
-    CreateCustomer
+    CreateCustomer,
+    GetCustomer
 }
