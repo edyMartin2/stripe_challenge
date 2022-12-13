@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "tests-on-cli": "node_modules/.bin/cypress run --headless --browser chrome",
-    "tests-on-browser": "node_modules/.bin/cypress run --headed --browser chrome --no-exit"
+    "tests-on-browser": "node_modules/.bin/cypress run --headed --browser electron --no-exit"
   },
   "keywords": [],
   "author": "",
