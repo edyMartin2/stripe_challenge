@@ -1,10 +1,7 @@
+import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import React from "react";
 import Thanks from "./Thanks";
-import {
-  CardElement,
-  useStripe,
-  useElements
-} from "@stripe/react-stripe-js";
+
 //Payment Form, process user information to allow payment.
 
 const PaymentForm = (props) => {
@@ -20,6 +17,7 @@ const PaymentForm = (props) => {
                 <input
                   type="text"
                   id="name"
+                  name="name"
                   placeholder="Name"
                   autoComplete="cardholder"
                   className="sr-input"
@@ -29,6 +27,7 @@ const PaymentForm = (props) => {
                 <input
                   type="text"
                   id="email"
+                  name="email"
                   placeholder="Email"
                   autoComplete="cardholder"
                 />
@@ -43,7 +42,7 @@ const PaymentForm = (props) => {
             </div>
             <div className="sr-field-error" id="card-errors" role="alert"></div>
           </div>
-          <button id="submit">
+          <button id="submit" type="submit">
             <div className="spinner hidden" id="spinner"></div>
             <span id="button-text hidden">Purchase</span>
           </button>

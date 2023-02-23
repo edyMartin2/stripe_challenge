@@ -13,24 +13,22 @@ import "../css/eco-nav.scss";
 
 const App = () => {
   return (
-    <React.StrictMode>
-      <Suspense fallback="loading">
-        {
-          // Routes for principal UI sections.
-          // Concert Tickets Challenge: /concert
-          // Online Video Purchase: /video
-          // Online Lessons: /lessons
-        }
-        <Router>
-          <Home path="/" />
-          <Videos path="/videos" />
-          <Concert path="/concert" />
-          <ConcertSuccess path="/concert-success/:id" />
-          <Lessons path="/lessons" />
-          <AccountUpdate path="/account-update/:id" />
-        </Router>
-      </Suspense>
-    </React.StrictMode>
+    <Suspense fallback="loading">
+      {
+        // Routes for principal UI sections.
+        // Concert Tickets Challenge: /concert
+        // Online Video Purchase: /video
+        // Online Lessons: /lessons
+      }
+      <Router>
+        <Home path="/" />
+        <Videos path="/videos" />
+        <Concert path="/concert" />
+        <ConcertSuccess path="/concert-success/:id" />
+        <Lessons path="/lessons" />
+        <AccountUpdate path="/account-update/:id" />
+      </Router>
+    </Suspense>
   );
 };
 
