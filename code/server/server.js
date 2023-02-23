@@ -125,11 +125,86 @@ app.get('/setup-video-page', (req, res) => {
 // Milestone 1: Signing up
 // Shows the lesson sign up page.
 
+
+app.get("/lessons", (req, res) => {
+
+  console.log("entramos al ", process.env)
+  try {
+    // res.redirect(`${process.env.WEB_APP_URL}/lessons`)
+    const path = resolve(`${process.env.STATIC_DIR}/lessons.html`);
+    if (!fs.existsSync(path)) throw Error();
+    res.sendFile(path);
+  } catch (error) {
+    console.log("entramos al error", error)
+    const path = resolve("./public/static-file-error.html");
+    res.sendFile(path);
+  }
+});
+
+app.post("/lessons", async (req, res) => {
+  try {
+    const data = req.body;
+    const { name, email, token, first_lesson } = data;
+
+    const customers = await stripe.customers.list({
+      email: email,
+      limit: 1,
+    });
+
+    if (customers.data.length > 0 && customers.data[0].default_source) {
+      return res.status(403).json({
+        message: "Email already exist",
+        customer_id: customers.data[0].id,
+      });
+    }
+
+    const customer = await stripe.customers.create({
+      name: name,
+      email: email,
+      metadata: { first_lesson: first_lesson },
+    });
+
+    const setupIntent = await stripe.setupIntents.create({
+      customer: customer.id,
+      payment_method_types: ["card"],
+      payment_method_options: {
+        card: {
+          request_three_d_secure: "any",
+        },
+      },
+    });
+
+    const source = await stripe.customers.createSource(customer.id, {
+      source: token,
+    });
+    console.log(
+      "source",
+      source,
+      "customer",
+      customer,
+      "setupintent",
+      setupIntent
+    );
+    res.send({
+      clientSecret: setupIntent.client_secret,
+      customer_id: setupIntent.customer,
+      last4: source.last4,
+    });
+  } catch (e) {
+    console.log("lessons route", e);
+    return res.status(400).send({
+      error: {
+        message: e.message,
+      },
+    });
+  }
+});
+
 app.get('/get_key', (req, res) => {
   res.send({ app_key: process.env.STRIPE_PUBLISHABLE_KEY })
 })
 
-app.get('/lessons', (req, res) => {
+/*app.get('/lessons', (req, res) => {
   res.redirect(`${process.env.WEB_APP_URL}/lessons`)
 });
 
@@ -146,6 +221,8 @@ app.post('/lessons', async (req, res) => {
 
   res.send(response)
 });
+*/
+
 
 app.get('/get_account/:id', async (req, res) => {
   let customer_id = req.params.id;
@@ -158,6 +235,7 @@ app.get('/get_account/:id', async (req, res) => {
   }
   res.send(response)
 })
+
 // Milestone 2: '/schedule-lesson'
 // Authorize a payment for a lesson
 //
